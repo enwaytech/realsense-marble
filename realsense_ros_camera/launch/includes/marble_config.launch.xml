@@ -137,22 +137,4 @@
     <param name="camera_aligned_depth_to_fisheye_frame_id" type="str"  value="camera_aligned_depth_to_fisheye_frame"/>
   </node>
 
-
-  <node pkg="nodelet" type="nodelet" name="rs_decimation"
-        args="load image_proc/crop_decimate $(arg manager) --no-bond">
-    <remap from="camera/image_raw"       to="/$(arg node_namespace)/depth/image_rect_raw"/>
-    <remap from="camera/camera_info"     to="/$(arg node_namespace)/depth/camera_info"/>
-    <remap from="camera_out/image_raw"   to="/$(arg node_namespace)/depth_dec/image_rect_raw"/>
-    <remap from="camera_out/camera_info" to="/$(arg node_namespace)/depth_dec/camera_info"/>
-    <param name="decimation_x"           type="int"  value="4"/>
-    <param name="decimation_y"           type="int"  value="4"/>
-  </node>
-
-  <node pkg="nodelet" type="nodelet" name="rs_pointcloud"
-        args="load depth_image_proc/point_cloud_xyz $(arg manager) --no-bond">
-    <remap from="image_rect"    to="/$(arg node_namespace)/depth_dec/image_rect_raw"/>
-    <remap from="camera_info"   to="/$(arg node_namespace)/depth_dec/camera_info"/>
-    <remap from="points"        to="/$(arg node_namespace)/depth_dec/point_cloud"/>
-  </node>
-
 </launch>
