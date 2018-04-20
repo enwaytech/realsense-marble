@@ -17,7 +17,6 @@
   <group ns="$(arg namespace)">
     <include file="$(find realsense_ros_camera)/launch/includes/marble_config.launch.xml">
       <arg name="serial_no"                value="$(arg serial_no)"/>
-      <arg name="json_file_path"           value="$(arg operation_mode)"/>
       <arg name="base_frame_id"            value="$(arg namespace)_link"/>
       <arg name="node_namespace"           value="$(arg namespace)"/>
     </include>
