@@ -17,6 +17,39 @@
     - 'image_transport/theora'
   </rosparam>
 
+  <group unless="$(arg playback)">
+    <machine
+      name="com-1"
+      address="192.168.0.2"
+      env-loader="/home/marble/mbot/install/env.sh"
+      default="false"
+    />
+
+    <machine
+      name="com-2"
+      address="192.168.0.3"
+      env-loader="/home/marble/mbot/install/env.sh"
+      default="false"
+    />
+  </group>
+
+  <!-- Definitions when in playback mode (on development machine). Change the host to
+       local, and remove the environment since it should already be set and we don't want
+       to assume a path. -->
+  <group if="$(arg playback)">
+    <machine
+      name="com-1"
+      address="localhost"
+      default="false"
+    />
+
+    <machine
+      name="com-2"
+      address="localhost"
+      default="false"
+    />
+  </group>
+
   <arg name="manager"             default="realsense_ros_camera_manager"/>
   <arg name="serial_no"           default=""/>
   <arg name="json_file_path"      default=""/>
