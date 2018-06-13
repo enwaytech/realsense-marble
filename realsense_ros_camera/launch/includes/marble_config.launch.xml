@@ -17,6 +17,7 @@
     - 'image_transport/theora'
   </rosparam>
 
+  <arg name="playback"      default="true"/>
   <group unless="$(arg playback)">
     <machine
       name="com-1"
