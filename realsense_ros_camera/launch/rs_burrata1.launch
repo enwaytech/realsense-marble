@@ -28,6 +28,7 @@
       <arg name="serial_no"                value="$(arg serial_no_rs_right_forward)"/>
       <arg name="base_frame_id"            value="$(arg namespace_1)_link"/>
       <arg name="node_namespace"           value="$(arg namespace_1)"/>
+      <arg name="enable_color"             value="false"/>
     </include>
   </group>
 
@@ -36,6 +37,7 @@
       <arg name="serial_no"                value="$(arg serial_no_rs_left_forward)"/>
       <arg name="base_frame_id"            value="$(arg namespace_2)_link"/>
       <arg name="node_namespace"           value="$(arg namespace_2)"/>
+      <arg name="enable_color"             value="false"/>
     </include>
   </group>
 
@@ -52,6 +54,7 @@
       <arg name="serial_no"                value="$(arg serial_no_rs_front_down)"/>
       <arg name="base_frame_id"            value="$(arg namespace_4)_link"/>
       <arg name="node_namespace"           value="$(arg namespace_4)"/>
+      <arg name="enable_color"             value="false"/>
     </include>
   </group>
 
