@@ -555,6 +555,7 @@ void BaseRealSenseNode::setupStreams()
 		    ROS_INFO_STREAM("Frame time: "<<std::fixed<< t.toSec());
 //		    ROS_INFO_STREAM("Sensor time: "<<std::fixed<< frame.get_frame_metadata((rs2_frame_metadata_value)2));			
 		    ROS_INFO_STREAM("Frame time - Now time (ms): "<<std::fixed<< (t.toSec() - t2.toSec())*1000.0);
+		    ROS_INFO_STREAM("Sensor time - Frame time (ms): "<<std::fixed<< (frame.get_frame_metadata((rs2_frame_metadata_value)2)-frame.get_frame_metadata((rs2_frame_metadata_value)1)));
 		}
 
 
