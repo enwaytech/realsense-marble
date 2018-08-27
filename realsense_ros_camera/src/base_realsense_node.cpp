@@ -532,17 +532,31 @@ void BaseRealSenseNode::setupStreams()
                 {
                     if (RS2_TIMESTAMP_DOMAIN_SYSTEM_TIME == frame.get_frame_timestamp_domain())
                         ROS_WARN("Frame metadata isn't available! (frame_timestamp_domain = RS2_TIMESTAMP_DOMAIN_SYSTEM_TIME)");
-
+		    ROS_INFO_STREAM("We're here !!!!!!!!!!!!'");
                     _intialize_time_base = true;
                     _ros_time_base = ros::Time::now();
-                    _camera_time_base = frame.get_timestamp();
+                    _camera_time_base = frame.get_frame_metadata((rs2_frame_metadata_value)2);
                 }
 
                 ros::Time t;
                 if (_sync_frames)
+		{
+    		    ros::Time t2 = ros::Time(_ros_time_base.toSec()+ (/*ms*/ frame.get_timestamp() - /*ms*/ _camera_time_base) / /*ms to seconds*/ 1000.0);
                     t = ros::Time::now();
+		    ROS_INFO_STREAM("Now time: "<<std::fixed<< t.toSec());
+		    ROS_INFO_STREAM("Frame time: "<<std::fixed<< t2.toSec());
+		    ROS_INFO_STREAM("Frame time - Now time (ms): "<<std::fixed<< (t2.toSec() - t.toSec())*1000.0);
+		}
                 else
-                    t = ros::Time(_ros_time_base.toSec()+ (/*ms*/ frame.get_timestamp() - /*ms*/ _camera_time_base) / /*ms to seconds*/ 1000);
+		{
+                    t = ros::Time(_ros_time_base.toSec()+ (/*us*/ frame.get_frame_metadata((rs2_frame_metadata_value)2) - /*us*/ _camera_time_base) / /*ms to seconds*/ 1e6);
+		    ros::Time t2 = ros::Time::now();
+		    ROS_INFO_STREAM("Now time: "<<std::fixed<< t2.toSec());
+		    ROS_INFO_STREAM("Frame time: "<<std::fixed<< t.toSec());
+//		    ROS_INFO_STREAM("Sensor time: "<<std::fixed<< frame.get_frame_metadata((rs2_frame_metadata_value)2));			
+		    ROS_INFO_STREAM("Frame time - Now time (ms): "<<std::fixed<< (t.toSec() - t2.toSec())*1000.0);
+		}
+
 
                 std::map<stream_index_pair, bool> is_frame_arrived(_is_frame_arrived);
                 std::vector<rs2::frame> frames;
@@ -939,13 +953,13 @@ void BaseRealSenseNode::publishStaticTransforms()
     // The 2 transforms below are handled within the Marble static tf broadcaster, therefore
     // disabled here!
 
-    // publish_static_tf(transform_ts_, zero_trans, quaternion{0, 0, 0, 1}, _base_frame_id,
-    // _frame_id[DEPTH]);
+     publish_static_tf(transform_ts_, zero_trans, quaternion{0, 0, 0, 1}, _base_frame_id,
+     _frame_id[DEPTH]);
 
-    // Transform depth frame to depth optical frame
-    // quaternion q{quaternion_optical.getX(), quaternion_optical.getY(), quaternion_optical.getZ(),
-    // quaternion_optical.getW()};
-    // publish_static_tf(transform_ts_, zero_trans, q, _frame_id[DEPTH], _optical_frame_id[DEPTH]);
+//     Transform depth frame to depth optical frame
+     quaternion q{quaternion_optical.getX(), quaternion_optical.getY(), quaternion_optical.getZ(),
+     quaternion_optical.getW()};
+     publish_static_tf(transform_ts_, zero_trans, q, _frame_id[DEPTH], _optical_frame_id[DEPTH]);
 
     rs2::stream_profile depth_profile;
     if (!getEnabledProfile(DEPTH, depth_profile))
