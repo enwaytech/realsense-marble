@@ -531,7 +531,7 @@ void BaseRealSenseNode::setupStreams()
                 // In sync mode the timestamp is based on ROS time
 
 		// NEW METHOD:
-		// The ROS timestamp is computed using the UVC timestamp which is assumed to be synchronised to the 
+		// The ROS timestamp is computed using the UVC timestamp which is assumed to be synchronised to the
 		// frame timestamp of the device. Essentially we ignore the USB transmission time.
 		// We account for the time lag that happens when the data is captured (the sensor time)
 		// and when the data is actually transmitted.
@@ -561,6 +561,19 @@ void BaseRealSenseNode::setupStreams()
 		    rs2_metadata_type t_frame = frame.get_frame_metadata(RS2_FRAME_METADATA_FRAME_TIMESTAMP);
 		    // Time at which the data is capture  = UVC_time - (Frame_time-Sensor_time)
 		    t = ros::Time( /*ms*/ t_uvc_driver * /*ms to seconds*/ 1e-3 - (/*us*/ t_frame- /*us*/ t_sensor) * /*us to seconds*/ 1e-6);
+
+        if(_sensors[DEPTH].supports(RS2_OPTION_PROJECTOR_TEMPERATURE) && _sensors[DEPTH].supports(RS2_OPTION_ASIC_TEMPERATURE))
+        {
+          std::ofstream myfile;
+          std::string fname = ("/home/marble/realsense_temp_" + _serial_no + ".log");
+          myfile.open(fname, std::ios_base::app);
+          // std::cout<<frame.get_profile().stream_name()<<std::endl;
+          rs2_metadata_type t_temp = _sensors[DEPTH].get_option(RS2_OPTION_PROJECTOR_TEMPERATURE);
+          rs2_metadata_type t_temp2 = _sensors[DEPTH].get_option(RS2_OPTION_ASIC_TEMPERATURE);
+          myfile <<  std::to_string(t.toSec())+","+std::to_string(t_temp)+","+std::to_string(t_temp2) << std::endl;
+          myfile.close();
+        }
+
 		    // CHECK OFFSET FROM ROS TIME NOW :
 		    // Ros time now
 		    // ros::Time t2 = ros::Time::now();
@@ -1405,3 +1418,4 @@ void BaseRealSenseNode::registerDynamicReconfigCb()
     _f = boost::bind(&BaseRealSenseNode::callback, this, _1, _2);
     _server->setCallback(_f);
 }
+
