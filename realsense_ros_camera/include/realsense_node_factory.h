@@ -25,8 +25,7 @@
 #include <csignal>
 #include <eigen3/Eigen/Geometry>
 #include <fstream>
-#include <mutex>
-#include <condition_variable>
+
 
 namespace realsense_ros_camera
 {
@@ -66,7 +65,7 @@ namespace realsense_ros_camera
         virtual ~RealSenseNodeFactory() {}
 
     private:
-        rs2::device getDevice(std::string& serial_no, std::mutex& mtx, std::condition_variable& cv);
+        rs2::device getDevice(std::string& serial_no);
         virtual void onInit() override;
         void tryGetLogSeverity(rs2_log_severity& severity) const;
 

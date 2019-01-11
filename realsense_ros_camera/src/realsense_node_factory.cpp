@@ -7,9 +7,8 @@
 #include "../include/rs435_node.h"
 #include <iostream>
 #include <map>
-#include <thread>
-#include <chrono>
-
+#include <mutex>
+#include <condition_variable>
 
 using namespace realsense_ros_camera;
 
@@ -32,7 +31,7 @@ RealSenseNodeFactory::RealSenseNodeFactory()
     rs2::log_to_console(severity);
 }
 
-rs2::device RealSenseNodeFactory::getDevice(std::string& serial_no, std::mutex& mtx, std::condition_variable& cv)
+rs2::device RealSenseNodeFactory::getDevice(std::string& serial_no)
 {
     auto list = _ctx.query_devices();
     if (0 == list.size())
@@ -66,8 +65,9 @@ rs2::device RealSenseNodeFactory::getDevice(std::string& serial_no, std::mutex& 
 
     if (!found)
     {
-         std::unique_lock<std::mutex> lk(mtx);
-         cv.wait(lk);
+        ROS_FATAL_STREAM("The requested device with serial number " << serial_no << " is NOT found!");
+        ros::shutdown();
+        exit(1);
     }
 
     return retDev;
@@ -90,12 +90,15 @@ void RealSenseNodeFactory::onInit()
         auto privateNh = getPrivateNodeHandle();
         std::string serial_no("");
         privateNh.param("serial_no", serial_no, std::string(""));
-        dev = getDevice(serial_no, mtx, cv);
+        dev = getDevice(serial_no);
         ROS_INFO("Resetting device...");
         dev.hardware_reset();
-        std::this_thread::sleep_for (std::chrono::seconds(5));
+        {
+             std::unique_lock<std::mutex> lk(mtx);
+             cv.wait(lk);
+        }
 
-        _device = getDevice(serial_no, mtx, cv);
+        _device = getDevice(serial_no);
 
         _ctx.set_devices_changed_callback([this](rs2::event_information& info)
         {
