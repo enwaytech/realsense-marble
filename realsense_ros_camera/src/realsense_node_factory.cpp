@@ -9,6 +9,8 @@
 #include <map>
 #include <mutex>
 #include <condition_variable>
+#include <thread>
+#include <chrono>
 
 using namespace realsense_ros_camera;
 
@@ -93,11 +95,13 @@ void RealSenseNodeFactory::onInit()
         dev = getDevice(serial_no);
         ROS_INFO("Resetting device...");
         dev.hardware_reset();
+        std::chrono::seconds dura( 5);
+        std::this_thread::sleep_for( dura );
 
-        {
-             std::unique_lock<std::mutex> lk(mtx);
-             cv.wait(lk);
-        }
+        // {
+        //      std::unique_lock<std::mutex> lk(mtx);
+        //      cv.wait(lk);
+        // }
 
         _device = getDevice(serial_no);
 
