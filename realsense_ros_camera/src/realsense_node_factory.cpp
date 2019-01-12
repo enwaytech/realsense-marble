@@ -82,7 +82,7 @@ void RealSenseNodeFactory::onInit()
         std::unique_lock<std::mutex> lk(mtx);
         _ctx.set_devices_changed_callback([&dev, &cv](rs2::event_information& info)
         {
-          ROS_INFO("Callbacke");
+          ROS_INFO("Callback");
           ROS_INFO(dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
           if (info.was_removed(dev))
           {
