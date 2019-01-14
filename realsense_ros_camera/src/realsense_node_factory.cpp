@@ -79,16 +79,16 @@ void RealSenseNodeFactory::onInit()
         std::mutex mtx;
         std::condition_variable cv;
         rs2::device dev;
-        std::unique_lock<std::mutex> lk(mtx);
         _ctx.set_devices_changed_callback([&dev, &cv](rs2::event_information& info)
         {
-          ROS_INFO("Callback");
-          ROS_INFO(dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
-          if (info.was_removed(dev))
-          {
-            ROS_INFO("Device removed");
-            cv.notify_one();
-          }
+            ROS_INFO("Before IF");
+            if (info.was_removed(dev))
+            {
+              ROS_INFO("Device Removed");
+              cv.notify_one();
+            }
+            ROS_INFO("After IF");
+
         });
 
         auto privateNh = getPrivateNodeHandle();
@@ -98,6 +98,7 @@ void RealSenseNodeFactory::onInit()
         ROS_INFO("Resetting device...");
         dev.hardware_reset();
         {
+          std::unique_lock<std::mutex> lk(mtx);
           cv.wait(lk);
         }
 

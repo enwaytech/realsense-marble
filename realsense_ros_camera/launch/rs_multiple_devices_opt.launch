@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find realsense_ros_camera)/launch/rs_camera1.launch" />
+    <include file="$(find realsense_ros_camera)/launch/rs_camera2.launch" />
+</launch>
