@@ -1,0 +1,143 @@
+// define a realsense context
+
+std::cout << "Initialising realsense context" << std::endl;
+
+rs2::context rs2Ctx;
+
+rs2::device rs2Dev;
+
+resettingIntelRealsense = 0;
+
+resetCompleteIntelRealsense = 0;
+
+int gotDev = 0;
+
+// Define a callback mechanism - to detect when the sensor has been reset
+
+rs2Ctx.set_devices_changed_callback([&](rs2::event_information& info)
+
+{
+
+// loop thru all new devices - that is one that has been reset effectively
+
+for (auto&& dev : info.get_new_devices())
+
+{
+
+std::string devName = "";
+
+std::string devSerialNumber = "";
+
+std::string devFirmware = "";
+
+std::string devProdId = "";
+
+devProdId = dev.get_info(RS2_CAMERA_INFO_PRODUCT_ID);
+
+devSerialNumber = dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
+
+devName = dev.get_info(RS2_CAMERA_INFO_NAME);
+
+if (devName == "Intel RealSense D415")
+
+{
+
+devFirmware = dev.get_info(RS2_CAMERA_INFO_FIRMWARE_VERSION);
+
+}
+
+if (devName == "Intel RealSense D435")
+
+{
+
+devFirmware = dev.get_info(RS2_CAMERA_INFO_FIRMWARE_VERSION);
+
+}
+
+std::cout << "RESET Dev: " << devName << " Ser: " << devSerialNumber << " Firmware: " << devFirmware << " ProdID " << devProdId << std::endl;
+
+resetCompleteIntelRealsense = 1;
+
+}
+
+});
+
+// interate thru the intel device context looking for intel sensors
+
+// note that other devices like webcams can appear here too depending on their device type
+
+for (auto&& dev : rs2Ctx.query_devices()) // Query the list of connected RealSense devices
+
+{
+
+std::string devName = "";
+
+std::string devSerialNumber = "";
+
+std::string devFirmware = "";
+
+std::string devProdId = "";
+
+devProdId = dev.get_info(RS2_CAMERA_INFO_PRODUCT_ID);
+
+devSerialNumber = dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
+
+devName = dev.get_info(RS2_CAMERA_INFO_NAME);
+
+if (gotDev == 0 && (devName == "Intel RealSense D415" || devName == "Intel RealSense D435"))
+
+{
+
+devFirmware = dev.get_info(RS2_CAMERA_INFO_FIRMWARE_VERSION);
+
+// assume there is only one intel camera for now
+
+// save the device for future use
+
+rs2Dev = dev;
+
+gotDev = 1;
+
+}
+
+std::cout << "System Dev: " << devName << " Ser: " << devSerialNumber << " Firmware: " << devFirmware << " ProdID " << devProdId << std::endl;
+
+}
+
+////////////////////////////////////////////////////////////////
+
+// if we have found a realsense sensor - force initialise it if required
+
+if (gotDev == 1)
+
+{
+
+// reset the hardware device found during initial iteration thru context
+
+rs2Dev.hardware_reset();
+
+// wait for hardware to reset reset
+
+resetCompleteIntelRealsense = 0;
+
+int rs2WaitForReset = 1;
+
+// pause until device is reset - not elegant but will do for testing
+
+while (resetCompleteIntelRealsense == 0 && rs2WaitForReset < 9999999999)
+
+{
+
+rs2WaitForReset++;
+
+}
+
+}
+
+if (gotDev == 0)
+
+{
+
+std::cout << "No Intel Realsense devices detected" << std::endl;
+
+}

@@ -7,8 +7,8 @@
 #include "../include/rs435_node.h"
 #include <iostream>
 #include <map>
-#include <mutex>
-#include <condition_variable>
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 
 using namespace realsense_ros_camera;
 
@@ -79,24 +79,69 @@ void RealSenseNodeFactory::onInit()
         std::mutex mtx;
         std::condition_variable cv;
         rs2::device dev;
-        _ctx.set_devices_changed_callback([&dev, &cv](rs2::event_information& info)
-        {
-            if (info.was_removed(dev))
-            {
-                cv.notify_one();
-            }
-        });
 
         auto privateNh = getPrivateNodeHandle();
         std::string serial_no("");
         privateNh.param("serial_no", serial_no, std::string(""));
+
         dev = getDevice(serial_no);
-        ROS_INFO("Resetting device...");
+
+        // _ctx.set_devices_changed_callback([&dev, &cv](rs2::event_information& info)
+        // {
+        //     ROS_INFO_STREAM("Under INvestigation :"<<dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
+        //     if (info.was_removed(dev))
+        //     {
+        //         ROS_INFO_STREAM("Tell other thread to continue");
+        //         cv.notify_one();
+        //     }
+        // });
+
+        // _ctx.set_devices_changed_callback([&serial_no, &cv](rs2::event_information& info)
+        // {
+        //
+        //   int ctr = 0;
+        //
+        //   // loop thru all new devices - that is one that has been reset effectively
+        //   for (auto&& dev : info.get_new_devices())
+        //   {
+        //     ctr++;
+        //     ROS_INFO_STREAM(std::to_string(ctr));
+        //     std::string devName = "";
+        //     std::string devSerialNumber = "";
+        //     std::string devFirmware = "";
+        //     std::string devProdId = "";
+        //
+        //     devProdId = dev.get_info(RS2_CAMERA_INFO_PRODUCT_ID);
+        //     devSerialNumber = dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
+        //     devName = dev.get_info(RS2_CAMERA_INFO_NAME);
+        //     devFirmware = dev.get_info(RS2_CAMERA_INFO_FIRMWARE_VERSION);
+        //
+        //     std::cout << "RESET Dev: " << devName << " Ser: " << devSerialNumber << " Firmware: " << devFirmware << " ProdID " << devProdId << std::endl;
+        //
+        //     // resetCompleteIntelRealsense = 1;
+        //     if(devSerialNumber == serial_no)
+        //     {
+        //       ROS_INFO_STREAM("The device we wanted is reset");
+        //       cv.notify_one();
+        //     }
+        //   }
+        // });
+        //
+
+
+        ROS_INFO_STREAM("Resetting device with serial no :"<<dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
         dev.hardware_reset();
-        {
-             std::unique_lock<std::mutex> lk(mtx);
-             cv.wait(lk);
-        }
+        ROS_INFO_STREAM("SLEEPING :"<<dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
+        std::this_thread::sleep_for (std::chrono::seconds(10));
+        ROS_INFO_STREAM("WOKE UP :"<<dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
+
+
+        // {
+        //      std::unique_lock<std::mutex> lk(mtx);
+        //      ROS_INFO_STREAM("Locked");
+        //      cv.wait(lk);
+        //      ROS_INFO_STREAM("UnLocked");
+        // }
 
         _device = getDevice(serial_no);
 
