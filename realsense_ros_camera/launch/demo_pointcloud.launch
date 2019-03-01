@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
   <arg name="serial_no"    default=""/>
   <arg name="json_file_path"  default=""/>
@@ -14,14 +15,13 @@
       <arg name="color_fps"         value="30"/>
       <arg name="enable_depth"      value="true"/>
       <arg name="enable_color"      value="true"/>
-      <arg name="enable_infra1"     value="false"/>
-      <arg name="enable_infra2"     value="false"/>
+      <arg name="enable_infra1"     value="true"/>
+      <arg name="enable_infra2"     value="true"/>
       <arg name="enable_fisheye"    value="false"/>
       <arg name="enable_imu"        value="false"/>
       <arg name="enable_pointcloud" value="true"/>
       <arg name="enable_sync"       value="true"/>
     </include>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find realsense_ros_camera)/rviz/pointcloud.rviz" required="true" />
   </group>
 </launch>
